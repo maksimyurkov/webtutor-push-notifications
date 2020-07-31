@@ -1,6 +1,6 @@
 {
   "name": "@maksimyurkov/webtutor-push-notifications",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.1-beta.1",
   "description": "Модуль позволяет бесплатно отправлять push-уведомления пользователям WebTutor с помощью Firebase Cloud Messaging",
   "repository": "maksimyurkov/webtutor-push-notifications",
   "keywords": [
