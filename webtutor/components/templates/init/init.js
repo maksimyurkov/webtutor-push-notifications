@@ -1,19 +1,16 @@
 async function loadScripts() {
   await addScript({
-    src:
-      '/node_modules/@maksimyurkov/webtutor-push-notifications/node_modules/firebase/firebase-app.js',
+    src: '/node_modules/firebase/firebase-app.js',
     type: 'text/javascript',
     async: true,
   });
   await addScript({
-    src:
-      '/node_modules/@maksimyurkov/webtutor-push-notifications/node_modules/firebase/firebase-messaging.js',
+    src: '/node_modules/firebase/firebase-messaging.js',
     type: 'text/javascript',
     async: true,
   });
   await addScript({
-    src:
-      '/node_modules/@maksimyurkov/webtutor-push-notifications/node_modules/detect.js/detect.min.js',
+    src: '/node_modules/detect.js/detect.min.js',
     type: 'text/javascript',
     async: true,
   });

@@ -11,8 +11,8 @@ function run() {
 
     var fileTemplate =
       '\
-importScripts("/node_modules/@maksimyurkov/webtutor-push-notifications/node_modules/firebase/firebase-app.js");\
-importScripts("/node_modules/@maksimyurkov/webtutor-push-notifications/node_modules/firebase/firebase-messaging.js");\
+importScripts("/node_modules/firebase/firebase-app.js");\
+importScripts("/node_modules/firebase/firebase-messaging.js");\
 \
 firebase.initializeApp({\
   apiKey: "' +
