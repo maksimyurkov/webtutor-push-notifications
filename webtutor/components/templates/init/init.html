@@ -1,0 +1,42 @@
+<%=Session.Env.GetOptProperty('curUserID')%>
+<%
+var userId = "";
+if (Session.HasProperty('Env') && Session.Env.GetOptProperty('curUserID') !== undefined) userId = Session.Env.GetOptProperty('curUserID');
+
+// Инициализируем только если есть userId
+if (userId !== "") {
+%>
+
+<script>
+function addScript(options) {
+  const promise = new Promise(function(resolve) {
+    const script = document.createElement('script');
+    if (options.async) script.async = true;
+    if (options.defer) script.defer = true;
+    if (options.type) script.setAttribute('type', options.type);
+    script.src = options.src;
+    document.body.appendChild(script);
+    script.onload = function() {
+        resolve();
+    }
+  });
+  return promise  
+}
+
+// Проверяем что браузер поддерживает уведомления 
+if ('Notification' in window &&
+     window.Notification.permission !== "denied" &&
+    'serviceWorker' in navigator &&
+    'localStorage' in window &&
+    'fetch' in window &&
+    'postMessage' in window) {
+      addScript({
+          src: "/node_modules/@maksimyurkov/webtutor-push-notifications/webtutor/components/templates/init/init.js",
+          type: "text/javascript",
+          async: true
+      })
+    }
+</script>
+<%
+}
+%>

@@ -1,0 +1,105 @@
+<%
+function api(Request) {
+  // Подгружаем необходимые функции
+  var functions = OpenCodeLib('functions/import.js').run(['isAdmin', 'jsonStringify']);
+
+  // Параметры route
+  var routes = {
+    '/access/admin': ['all'],
+    '/check/agents': ['admin'],
+    '/check/firebase': ['admin'],
+    '/check/https': ['admin'],
+    '/check/service-worker': ['admin'],
+    '/check/tables': ['admin'],
+    '/check/templates': ['admin'],
+    '/config': ['admin'],
+    '/config/public': ['auth'],
+    '/config/set': ['admin'],
+    '/delete/agents': ['admin'],
+    '/delete/service-worker': ['admin'],
+    '/delete/tables': ['admin'],
+    '/delete/templates': ['admin'],
+    '/instances': ['admin'],
+    '/instances/update': ['auth'],
+    '/keys': ['admin'],
+    '/keys/add': ['admin'],
+    '/keys/delete': ['admin'],
+    '/queue': ['admin'],
+    '/queue/add': ['admin'],
+    '/queue/handler': ['admin'],
+    '/send': ['admin', 'key']
+  };
+
+  //  ID запроса
+  // var requestID = functions.uuid.run();
+
+  // Фиксируем запрос в логе сервера
+  // alert('API webtutor-push-notifications | ' + requestID + ' | ' + StrDate(Date(), true, true) + ' | ' + Request.RemoteIP);
+
+  // Добавляем заголовки
+  var origin = Request.Header.GetOptProperty("origin");
+  if (origin !== undefined) Request.AddRespHeader("Access-Control-Allow-Origin", origin, false);
+  var Origin = Request.Header.GetOptProperty("Origin");
+  if (Origin !== undefined ) Request.AddRespHeader("Access-Control-Allow-Origin", Origin, false);
+  if (origin === undefined && Origin === undefined) Request.AddRespHeader("Access-Control-Allow-Origin", "*", false);
+  Request.AddRespHeader("Access-Control-Allow-Credentials", true);
+  
+  // Request.AddRespHeader('request-id', requestID);
+
+  // Проверяем метод запроса
+  var method = Request.Method;
+  if (method !== 'GET' && method !== 'POST') {
+    Request.SetRespStatus(405, 'Method Not Allowed');
+    return ''
+  }
+
+  // Получаем параметры запроса
+  var parameters = Request.QueryString;
+
+  // Получаем значение параметра route
+  var route = parameters.GetOptProperty('route');
+  if (route === undefined) {
+    Request.SetRespStatus(400, 'Bad Request');
+    return ''
+  }
+
+  // Проверяем наличие текущего route в списке поддерживаемых 
+  if (routes.GetOptProperty(route) === undefined) {
+    Request.SetRespStatus(400, 'Bad Request');
+    return ''
+  }
+
+  // Проверяем наличие доступа
+  function checkAccess() {
+    var accesses = routes.GetOptProperty(route);
+    if (ArrayOptFind(accesses, 'This=="all"')) return true;
+    if (ArrayOptFind(accesses, 'This=="auth"') ) return true;
+    if (ArrayOptFind(accesses, 'This=="admin"')) {
+      var isAdmin = functions.isAdmin.run(Request)
+      if (isAdmin) return true;
+    }
+    if (ArrayOptFind(accesses, 'This=="key"')) {
+      var key = Request.Header.GetOptProperty("key");
+      if (key !== undefined) {
+        var keyExists = ArrayOptFirstElem(XQuery("sql: SELECT * FROM webtutor_push_notifications_keys WHERE \"key\" = '" + key + "';"));
+        if (keyExists !== undefined) return true;
+      }
+    }
+    return false;
+  }
+  var hasAccess = checkAccess();
+  
+  if (!hasAccess) {
+    Request.SetRespStatus(403, 'Forbidden');
+    return ''
+  }
+  
+  // Запускаем соответсвующую route функцию
+  var routeFileName = StrReplace(StrReplaceOne(route, '/', ''), '/', '-');
+  var result = OpenCodeLib('routes/' + routeFileName + '.js?' + Random(1, 1000000)).run(Request);
+  if (result.HasProperty("success")) return functions.jsonStringify.run(result);
+  return result;
+}
+%>
+
+<%=api(Request)%>
